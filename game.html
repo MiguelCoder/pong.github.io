@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pong</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Menu Principal -->
+  <div id="mainMenu" class="menu-container">
+    <h1>Pong</h1>
+    <button id="playButton">Jogar</button>
+    <button id="rankingButton">Ranking</button>
+    <button id="helpButton">Ajuda</button>
+  </div>
+
+  <!-- Menu de Jogadores -->
+  <div id="playerMenu" class="menu-container hidden">
+    <h1>Configuração de Jogadores</h1>
+    
+    <div class="input-group">
+      <label for="player1Name">Nome do Player 1:</label>
+      <input type="text" id="player1Name" class="input-box" placeholder="Player 1" maxlength="12">
+    </div>
+    
+    <div class="input-group">
+      <label for="player2Name">Nome do Player 2:</label>
+      <input type="text" id="player2Name" class="input-box" placeholder="Player 2" maxlength="12">
+    </div>
+    
+    <div class="toggle-container">
+      <span class="toggle-text">Jogar contra CPU</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="cpuMode">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <button id="continueButton">Continuar</button>
+    <button class="secondary" id="backFromPlayerMenu">Voltar</button>
+  </div>
+
+  <!-- Menu de Dificuldade -->
+  <div id="difficultyMenu" class="menu-container hidden">
+    <h1>Escolha a Dificuldade</h1>
+    <button data-difficulty="Muito Fácil">Muito Fácil</button>
+    <button data-difficulty="Fácil">Fácil</button>
+    <button data-difficulty="Normal">Normal</button>
+    <button data-difficulty="Médio">Médio</button>
+    <button data-difficulty="Difícil">Difícil</button>
+    <button data-difficulty="Impossível">Impossível</button>
+    <button class="secondary" id="backFromDifficultyMenu">Voltar</button>
+  </div>
+
+  <!-- Menu de Ranking -->
+  <div id="rankingMenu" class="menu-container hidden">
+    <h1>Ranking</h1>
+    <ul id="rankingList"></ul>
+    <button class="secondary" id="backFromRankingMenu">Voltar</button>
+  </div>
+
+  <!-- Menu de Ajuda -->
+  <div id="helpMenu" class="menu-container hidden">
+    <h1>Ajuda</h1>
+    <p>W/S para Player 1</p>
+    <p>↑/↓ para Player 2</p>
+    <p>Toque na tela para mover as raquetes (mobile)</p>
+    <p>Espaço: Pausar</p>
+    <p>Enter: Iniciar</p>
+    <button class="secondary" id="backFromHelpMenu">Voltar</button>
+  </div>
+
+  <!-- Tela do Jogo -->
+  <div id="gameScreen" class="hidden">
+    <div class="score-board">
+      <div class="player-score" id="player1Score">
+        <span class="player-name">Player 1</span>
+        <span class="score-value">0</span>
+      </div>
+      <div class="timer" id="gameTimer">3:00</div>
+      <div class="player-score" id="player2Score">
+        <span class="player-name">Player 2</span>
+        <span class="score-value">0</span>
+      </div>
+    </div>
+    
+    <div class="canvas-container">
+      <canvas id="pongCanvas" width="800" height="500"></canvas>
+    </div>
+    
+    <div class="game-buttons">
+      <button id="backToMenuButton">Voltar ao Menu</button>
+      <button id="pauseButton">Pausar</button>
+    </div>
+    
+    <!-- Controles Touch para Mobile -->
+    <div class="touch-controls hidden" id="touchControls">
+      <div class="touch-area left-area" id="leftTouch"></div>
+      <div class="touch-area right-area" id="rightTouch"></div>
+    </div>
+  </div>
+
+  <!-- Sons -->
+  <audio id="hitSound" src="beat.wav"></audio>
+  <audio id="pointSound" src="point.wav"></audio>
+  <audio id="winSound" src="winnner.wav"></audio>
+  <audio id="loseSound" src="loose.wav"></audio>
+
+  <script src="engine.js"></script>
+</body>
+</html>
