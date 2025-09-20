@@ -35,6 +35,8 @@ body {
   animation: fadeIn 0.8s ease-in-out;
   width: 100%;
   max-width: 800px;
+  position: relative;
+  z-index: 30; /* Garante que os menus fiquem acima de tudo */
 }
 
 /* Títulos */
@@ -60,7 +62,7 @@ p {
   margin: 5px 0;
 }
 
-/* Botões */
+/* Botões - Melhorias para mobile */
 button {
   padding: 12px 30px;
   font-size: 1.2rem;
@@ -74,6 +76,7 @@ button {
   transition: transform 0.2s, box-shadow 0.3s;
   margin: 8px;
   width: 250px;
+  touch-action: manipulation; /* Melhora a responsividade no mobile - MANTIDO */
 }
 
 button:hover {
@@ -131,6 +134,7 @@ label {
 .canvas-container {
   position: relative;
   display: inline-block;
+  z-index: 10; /* Canvas abaixo dos botões */
 }
 
 canvas {
@@ -263,7 +267,7 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-/* Game buttons */
+/* Game buttons - Melhorias para mobile */
 .game-buttons {
   display: flex;
   justify-content: center;
@@ -285,7 +289,7 @@ input:checked + .slider:before {
   width: 100%;
   height: 40%;
   display: flex;
-  z-index: 10;
+  z-index: 15; /* Acima do canvas, abaixo dos botões */
   pointer-events: none;
 }
 
@@ -322,8 +326,12 @@ input:checked + .slider:before {
 
   button {
     font-size: 1rem;
-    padding: 10px 20px;
+    padding: 15px 25px; /* Área de toque maior */
     width: 220px;
+    min-height: 50px; /* Altura mínima para melhor toque */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .input-box {
@@ -337,6 +345,13 @@ input:checked + .slider:before {
   .game-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+  }
+  
+  .game-buttons button {
+    min-width: 180px;
+    padding: 15px 25px;
   }
   
   .score-board {
@@ -381,6 +396,7 @@ input:checked + .slider:before {
   button {
     width: 200px;
     margin: 5px;
+    padding: 14px 22px;
   }
   
   .touch-controls {
