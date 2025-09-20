@@ -724,6 +724,15 @@ function getTouchY(touch) {
 
 // Player 1 - Controle por arraste
 canvas.addEventListener('touchstart', (e) => {
+  // Verificar se o toque foi em um botão primeiro
+  const touch = e.touches[0];
+  const element = document.elementFromPoint(touch.clientX, touch.clientY);
+  
+  // Se tocou em um botão, não processar o movimento da raquete
+  if (element && (element.tagName === 'BUTTON' || element.closest('button'))) {
+    return;
+  }
+  
   e.preventDefault();
   const touches = e.changedTouches;
   
@@ -796,12 +805,18 @@ canvas.addEventListener("click", (e) => {
 
 canvas.addEventListener("touchend", (e) => {
   if (gameOver) {
-    e.preventDefault();
-    backToMenu();
+    // Verificar se o toque foi no canvas (não em um botão)
+    const touch = e.changedTouches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    if (element === canvas || element.parentElement === canvas) {
+      e.preventDefault();
+      backToMenu();
+    }
   }
 });
 
-// CONFIGURAÇÃO DOS EVENT LISTENERS - CORRIGIDO
+// CONFIGURAÇÃO DOS EVENT LISTENERS - CORRIGIDO PARA MOBILE
 function setupEventListeners() {
   // Menu principal
   const playButton = document.getElementById("playButton");
@@ -812,16 +827,29 @@ function setupEventListeners() {
     playButton.addEventListener("click", function() {
       showMenu('playerMenu');
     });
+    // Adicionar listener para touch também
+    playButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      showMenu('playerMenu');
+    });
   }
   
   if (rankingButton) {
     rankingButton.addEventListener("click", function() {
       showMenu('rankingMenu');
     });
+    rankingButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      showMenu('rankingMenu');
+    });
   }
   
   if (helpButton) {
     helpButton.addEventListener("click", function() {
+      showMenu('helpMenu');
+    });
+    helpButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
       showMenu('helpMenu');
     });
   }
@@ -832,10 +860,18 @@ function setupEventListeners() {
   
   if (continueButton) {
     continueButton.addEventListener("click", savePlayerNames);
+    continueButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      savePlayerNames();
+    });
   }
   
   if (backFromPlayerMenu) {
     backFromPlayerMenu.addEventListener("click", function() {
+      showMenu('mainMenu');
+    });
+    backFromPlayerMenu.addEventListener("touchend", function(e) {
+      e.preventDefault();
       showMenu('mainMenu');
     });
   }
@@ -849,11 +885,19 @@ function setupEventListeners() {
       button.addEventListener("click", function() {
         startGame(this.getAttribute('data-difficulty'));
       });
+      button.addEventListener("touchend", function(e) {
+        e.preventDefault();
+        startGame(this.getAttribute('data-difficulty'));
+      });
     });
   }
   
   if (backFromDifficultyMenu) {
     backFromDifficultyMenu.addEventListener("click", function() {
+      showMenu('playerMenu');
+    });
+    backFromDifficultyMenu.addEventListener("touchend", function(e) {
+      e.preventDefault();
       showMenu('playerMenu');
     });
   }
@@ -864,6 +908,10 @@ function setupEventListeners() {
     backFromRankingMenu.addEventListener("click", function() {
       showMenu('mainMenu');
     });
+    backFromRankingMenu.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      showMenu('mainMenu');
+    });
   }
   
   // Menu de ajuda
@@ -872,18 +920,32 @@ function setupEventListeners() {
     backFromHelpMenu.addEventListener("click", function() {
       showMenu('mainMenu');
     });
+    backFromHelpMenu.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      showMenu('mainMenu');
+    });
   }
   
-  // Tela de jogo
+  // Tela de jogo - BOTÕES CORRIGIDOS PARA MOBILE
   const backToMenuButton = document.getElementById("backToMenuButton");
   const pauseButton = document.getElementById("pauseButton");
   
   if (backToMenuButton) {
     backToMenuButton.addEventListener("click", backToMenu);
+    backToMenuButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      e.stopPropagation(); // Impedir que o evento se propague para o canvas
+      backToMenu();
+    });
   }
   
   if (pauseButton) {
     pauseButton.addEventListener("click", togglePause);
+    pauseButton.addEventListener("touchend", function(e) {
+      e.preventDefault();
+      e.stopPropagation(); // Impedir que o evento se propague para o canvas
+      togglePause();
+    });
   }
 }
 
