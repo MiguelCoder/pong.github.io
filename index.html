@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pong</title>
+  <title>Pong Neon</title>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Menu Principal -->
   <div id="mainMenu" class="menu-container">
-    <h1>Pong</h1>
+    <h1>PONG NEON</h1>
     <button id="playButton">Jogar</button>
     <button id="rankingButton">Ranking</button>
     <button id="helpButton">Ajuda</button>
@@ -56,19 +57,57 @@
 
   <!-- Menu de Ranking -->
   <div id="rankingMenu" class="menu-container hidden">
-    <h1>Ranking</h1>
-    <ul id="rankingList"></ul>
+    <h1>RANKING GLOBAL</h1>
+    
+    <!-- Filtros de Ranking -->
+    <div class="ranking-filters">
+      <button id="filterSinglePlayer" class="filter-btn active">Single Player</button>
+      <button id="filterMultiplayer" class="filter-btn">Multiplayer</button>
+    </div>
+    
+    <!-- Loading do Ranking -->
+    <div id="rankingLoading" class="loading">
+      <div class="loading-spinner"></div>
+      <p>Carregando ranking...</p>
+    </div>
+    
+    <!-- Lista do Ranking -->
+    <div id="rankingContainer" class="ranking-container">
+      <ul id="rankingList" class="ranking-list"></ul>
+      <div id="noRanking" class="no-ranking hidden">
+        <p>Nenhum registro encontrado</p>
+        <p>Seja o primeiro a aparecer no ranking!</p>
+      </div>
+    </div>
+    
     <button class="secondary" id="backFromRankingMenu">Voltar</button>
   </div>
 
   <!-- Menu de Ajuda -->
   <div id="helpMenu" class="menu-container hidden">
-    <h1>Ajuda</h1>
-    <p>W/S para Player 1</p>
-    <p>↑/↓ para Player 2</p>
-    <p>Toque na tela para mover as raquetes (mobile)</p>
-    <p>Espaço: Pausar</p>
-    <p>Enter: Iniciar</p>
+    <h1>Como Jogar</h1>
+    <div class="help-content">
+      <div class="help-section">
+        <h3>Controles Desktop:</h3>
+        <p><span class="key">W</span> / <span class="key">S</span> - Player 1</p>
+        <p><span class="key">↑</span> / <span class="key">↓</span> - Player 2</p>
+        <p><span class="key">ESPAÇO</span> - Pausar</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Controles Mobile:</h3>
+        <p>Toque nas áreas laterais da tela para mover as raquetes</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Sistema de Pontos:</h3>
+        <p>• Vitória: +100 pontos base</p>
+        <p>• Bônus por dificuldade (CPU)</p>
+        <p>• Bônus por tempo restante</p>
+        <p>• Bônus por diferença de pontos</p>
+      </div>
+    </div>
+    
     <button class="secondary" id="backFromHelpMenu">Voltar</button>
   </div>
 
@@ -102,12 +141,36 @@
     </div>
   </div>
 
+  <!-- Modal de Novo Recorde -->
+  <div id="newRecordModal" class="winner-modal hidden">
+    <div class="winner-card record-card">
+      <div class="record-title">🏆 NOVO RECORDE! 🏆</div>
+      <div class="record-score">
+        <span id="recordPoints">0</span> pontos
+      </div>
+      <div class="record-message">
+        Parabéns! Você entrou no ranking global!
+      </div>
+      <div class="winner-buttons">
+        <button class="winner-button" onclick="closeNewRecordModal();">
+          CONTINUAR
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Sons -->
   <audio id="hitSound" src="beat.wav"></audio>
   <audio id="pointSound" src="point.wav"></audio>
   <audio id="winSound" src="winnner.wav"></audio>
   <audio id="loseSound" src="loose.wav"></audio>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  
+  <!-- Scripts do Jogo -->
+  <script src="firebase-config.js"></script>
   <script src="engine.js"></script>
 </body>
 </html>

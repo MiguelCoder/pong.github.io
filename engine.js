@@ -27,6 +27,7 @@ function setupEventListeners() {
   
   document.getElementById("rankingButton").addEventListener("click", function() {
     showMenu('rankingMenu');
+    rankingManager.loadAndShowRanking(rankingManager.currentFilter);
   });
   
   document.getElementById("helpButton").addEventListener("click", function() {
@@ -68,6 +69,9 @@ function setupEventListeners() {
   // Controles de teclado
   document.addEventListener("keydown", keyDownHandler);
   document.addEventListener("keyup", keyUpHandler);
+  
+  // Setup ranking event listeners
+  rankingManager.setupRankingEventListeners();
 }
 
 // Sistema de Partículas
@@ -738,6 +742,40 @@ function showWinnerModal(winner, p1Score, p2Score) {
   `;
   
   document.body.appendChild(modal);
+  
+  // Salva resultado no ranking se não for empate
+  if (!isDraw) {
+    saveGameToRanking(winner, p1Score, p2Score);
+  }
+}
+
+// Salva o jogo no ranking do Firebase
+async function saveGameToRanking(winner, p1Score, p2Score) {
+  try {
+    const isPlayer1Winner = winner === player1Name;
+    const playerScore = isPlayer1Winner ? p1Score : p2Score;
+    const opponentScore = isPlayer1Winner ? p2Score : p1Score;
+    
+    const gameData = {
+      winner: true,
+      playerScore: playerScore,
+      opponentScore: opponentScore,
+      timeLeft: timeLeft,
+      difficulty: cpuDifficulty,
+      gameMode: againstCPU ? 'cpu' : 'multiplayer'
+    };
+
+    const result = await rankingManager.saveGameResult(winner, gameData);
+    
+    if (result && result.isNewRecord && result.score > 50) {
+      // Mostra modal de novo recorde após um delay
+      setTimeout(() => {
+        showNewRecordModal(result.score);
+      }, 2000);
+    }
+  } catch (error) {
+    console.error('Erro ao salvar no ranking:', error);
+  }
 }
 
 // Função para fechar placa de vencedor
