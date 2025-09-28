@@ -13,6 +13,11 @@ let isPaused = false;
 let player1Name = "Player 1";
 let player2Name = "Player 2";
 
+// Variáveis para efeitos de colisão
+let particles = [];
+let screenShake = { x: 0, y: 0, intensity: 0, duration: 0 };
+let glowEffects = [];
+
 // Configuração dos event listeners
 function setupEventListeners() {
   // Menu principal
@@ -63,6 +68,125 @@ function setupEventListeners() {
   // Controles de teclado
   document.addEventListener("keydown", keyDownHandler);
   document.addEventListener("keyup", keyUpHandler);
+}
+
+// Sistema de Partículas
+class Particle {
+  constructor(x, y, color, size = 3) {
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 10;
+    this.vy = (Math.random() - 0.5) * 10;
+    this.life = 1.0;
+    this.decay = Math.random() * 0.03 + 0.02;
+    this.color = color;
+    this.size = size;
+    this.initialSize = size;
+  }
+
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+    this.life -= this.decay;
+    this.size = this.initialSize * this.life;
+  }
+
+  draw(ctx) {
+    if (this.life <= 0) return;
+    
+    ctx.save();
+    ctx.globalAlpha = this.life;
+    ctx.fillStyle = this.color;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  isDead() {
+    return this.life <= 0;
+  }
+}
+
+// Sistema de Efeitos de Brilho
+class GlowEffect {
+  constructor(x, y, radius, color, duration = 300) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.maxRadius = radius;
+    this.color = color;
+    this.life = 1.0;
+    this.duration = duration;
+    this.elapsed = 0;
+  }
+
+  update(deltaTime) {
+    this.elapsed += deltaTime;
+    this.life = Math.max(0, 1 - (this.elapsed / this.duration));
+    this.radius = this.maxRadius * (1 + (1 - this.life) * 2);
+  }
+
+  draw(ctx) {
+    if (this.life <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = this.life * 0.5;
+    
+    // Cria gradiente radial
+    const gradient = ctx.createRadialGradient(
+      this.x, this.y, 0,
+      this.x, this.y, this.radius
+    );
+    gradient.addColorStop(0, this.color);
+    gradient.addColorStop(1, 'transparent');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  isDead() {
+    return this.life <= 0;
+  }
+}
+
+// Função para criar explosão de partículas
+function createParticleExplosion(x, y, color, count = 15) {
+  for (let i = 0; i < count; i++) {
+    particles.push(new Particle(x, y, color, Math.random() * 4 + 2));
+  }
+}
+
+// Função para criar efeito de brilho
+function createGlowEffect(x, y, radius, color) {
+  glowEffects.push(new GlowEffect(x, y, radius, color));
+}
+
+// Função para criar screen shake
+function createScreenShake(intensity = 10, duration = 200) {
+  screenShake.intensity = intensity;
+  screenShake.duration = duration;
+}
+
+// Função para atualizar screen shake
+function updateScreenShake(deltaTime) {
+  if (screenShake.duration > 0) {
+    screenShake.duration -= deltaTime;
+    const shakeAmount = screenShake.intensity * (screenShake.duration / 200);
+    screenShake.x = (Math.random() - 0.5) * shakeAmount;
+    screenShake.y = (Math.random() - 0.5) * shakeAmount;
+  } else {
+    screenShake.x = 0;
+    screenShake.y = 0;
+    screenShake.intensity = 0;
+  }
 }
 
 // Função para mostrar/ocultar menus
@@ -142,7 +266,8 @@ function initGame() {
     height: paddleHeight,
     speed: 8,
     moveUp: false,
-    moveDown: false
+    moveDown: false,
+    glowIntensity: 0
   };
   
   player2 = {
@@ -152,7 +277,8 @@ function initGame() {
     height: paddleHeight,
     speed: 8,
     moveUp: false,
-    moveDown: false
+    moveDown: false,
+    glowIntensity: 0
   };
   
   // Define a bola
@@ -166,6 +292,10 @@ function initGame() {
   // Reinicia o temporizador
   timeLeft = 180;
   updateTimer();
+  
+  // Limpa efeitos
+  particles = [];
+  glowEffects = [];
 }
 
 // Resetar a bola
@@ -176,7 +306,8 @@ function resetBall() {
     radius: 10,
     speed: 7,
     velocityX: 5,
-    velocityY: 5
+    velocityY: 5,
+    trail: []
   };
 }
 
@@ -208,23 +339,57 @@ function updateTimer() {
   document.getElementById("gameTimer").textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
+let lastTime = 0;
+
 // Loop principal do jogo
-function loop() {
+function loop(currentTime = 0) {
   if (!gameRunning) return;
   
+  const deltaTime = currentTime - lastTime;
+  lastTime = currentTime;
+  
   if (!isPaused) {
-    // Limpa o canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Atualiza efeitos
+    updateEffects(deltaTime);
+    
+    // Limpa o canvas com screen shake
+    ctx.save();
+    ctx.translate(screenShake.x, screenShake.y);
+    ctx.clearRect(-screenShake.x, -screenShake.y, canvas.width, canvas.height);
     
     // Desenha os elementos
     draw();
     
     // Atualiza as posições
     update();
+    
+    ctx.restore();
   }
   
   // Continua o loop
   requestAnimationFrame(loop);
+}
+
+// Atualizar efeitos
+function updateEffects(deltaTime) {
+  // Atualiza partículas
+  particles = particles.filter(particle => {
+    particle.update();
+    return !particle.isDead();
+  });
+  
+  // Atualiza efeitos de brilho
+  glowEffects = glowEffects.filter(glow => {
+    glow.update(deltaTime);
+    return !glow.isDead();
+  });
+  
+  // Atualiza screen shake
+  updateScreenShake(deltaTime);
+  
+  // Diminui o brilho das raquetes
+  player1.glowIntensity *= 0.95;
+  player2.glowIntensity *= 0.95;
 }
 
 // Desenhar elementos
@@ -232,6 +397,9 @@ function draw() {
   // Desenha o campo
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Desenha efeitos de brilho primeiro
+  glowEffects.forEach(glow => glow.draw(ctx));
   
   // Desenha a linha central
   ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
@@ -242,22 +410,76 @@ function draw() {
   ctx.stroke();
   ctx.setLineDash([]);
   
-  // Desenha as raquetes
-  ctx.fillStyle = "cyan";
-  ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
+  // Desenha trail da bola
+  drawBallTrail();
   
-  ctx.fillStyle = "#ff00ff";
-  ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
+  // Desenha as raquetes com efeito de brilho
+  drawPaddleWithGlow(player1, "cyan");
+  drawPaddleWithGlow(player2, "#ff00ff");
   
-  // Desenha a bola
+  // Desenha a bola com efeito
+  drawBallWithGlow();
+  
+  // Desenha partículas
+  particles.forEach(particle => particle.draw(ctx));
+}
+
+// Desenhar raquete com brilho
+function drawPaddleWithGlow(paddle, color) {
+  ctx.save();
+  
+  // Efeito de brilho se a raquete foi atingida
+  if (paddle.glowIntensity > 0) {
+    ctx.shadowBlur = 20 + paddle.glowIntensity * 30;
+    ctx.shadowColor = color;
+  } else {
+    ctx.shadowBlur = 5;
+    ctx.shadowColor = color;
+  }
+  
+  ctx.fillStyle = color;
+  ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+  ctx.restore();
+}
+
+// Desenhar bola com brilho
+function drawBallWithGlow() {
+  ctx.save();
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "white";
   ctx.fillStyle = "white";
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
+}
+
+// Desenhar trail da bola
+function drawBallTrail() {
+  if (ball.trail.length > 1) {
+    ctx.save();
+    for (let i = 0; i < ball.trail.length - 1; i++) {
+      const alpha = i / ball.trail.length;
+      ctx.globalAlpha = alpha * 0.3;
+      ctx.fillStyle = "white";
+      const point = ball.trail[i];
+      const size = ball.radius * alpha;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
 }
 
 // Atualizar posições
 function update() {
+  // Atualiza trail da bola
+  ball.trail.push({ x: ball.x, y: ball.y });
+  if (ball.trail.length > 8) {
+    ball.trail.shift();
+  }
+  
   // Move o jogador 1
   if (player1.moveUp && player1.y > 0) {
     player1.y -= player1.speed;
@@ -321,6 +543,11 @@ function update() {
   // Colisão com as bordas superior e inferior
   if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
     ball.velocityY = -ball.velocityY;
+    
+    // Efeitos de colisão com parede
+    createParticleExplosion(ball.x, ball.y, "orange", 8);
+    createGlowEffect(ball.x, ball.y, 30, "orange");
+    createScreenShake(5, 100);
     playSound('hitSound');
   }
   
@@ -329,12 +556,22 @@ function update() {
     // Jogador 2 marca ponto
     player2Score++;
     updateScore();
+    
+    // Efeitos especiais de ponto
+    createParticleExplosion(ball.x, ball.y, "#ff00ff", 20);
+    createGlowEffect(ball.x, ball.y, 50, "#ff00ff");
+    createScreenShake(15, 300);
     playSound('pointSound');
     resetBall();
   } else if (ball.x + ball.radius > canvas.width) {
     // Jogador 1 marca ponto
     player1Score++;
     updateScore();
+    
+    // Efeitos especiais de ponto
+    createParticleExplosion(ball.x, ball.y, "cyan", 20);
+    createGlowEffect(ball.x, ball.y, 50, "cyan");
+    createScreenShake(15, 300);
     playSound('pointSound');
     resetBall();
   }
@@ -343,25 +580,49 @@ function update() {
   if (
     ball.x - ball.radius < player1.x + player1.width &&
     ball.y > player1.y &&
-    ball.y < player1.y + player1.height
+    ball.y < player1.y + player1.height &&
+    ball.velocityX < 0
   ) {
     ball.velocityX = -ball.velocityX;
+    
     // Ajusta o ângulo baseado onde a bola atingiu a raquete
     let hitPoint = (ball.y - player1.y) / player1.height;
     ball.velocityY = (hitPoint - 0.5) * 10;
+    
+    // Efeitos de colisão com raquete
+    player1.glowIntensity = 1.0;
+    createParticleExplosion(ball.x, ball.y, "cyan", 12);
+    createGlowEffect(ball.x, ball.y, 40, "cyan");
+    createScreenShake(8, 150);
     playSound('hitSound');
+    
+    // Aumenta velocidade gradualmente
+    ball.velocityX *= 1.05;
+    ball.velocityY *= 1.05;
   }
   
   if (
     ball.x + ball.radius > player2.x &&
     ball.y > player2.y &&
-    ball.y < player2.y + player2.height
+    ball.y < player2.y + player2.height &&
+    ball.velocityX > 0
   ) {
     ball.velocityX = -ball.velocityX;
+    
     // Ajusta o ângulo baseado onde a bola atingiu a raquete
     let hitPoint = (ball.y - player2.y) / player2.height;
     ball.velocityY = (hitPoint - 0.5) * 10;
+    
+    // Efeitos de colisão com raquete
+    player2.glowIntensity = 1.0;
+    createParticleExplosion(ball.x, ball.y, "#ff00ff", 12);
+    createGlowEffect(ball.x, ball.y, 40, "#ff00ff");
+    createScreenShake(8, 150);
     playSound('hitSound');
+    
+    // Aumenta velocidade gradualmente
+    ball.velocityX *= 1.05;
+    ball.velocityY *= 1.05;
   }
 }
 

@@ -46,6 +46,7 @@ h1 {
   text-shadow: 0 0 10px cyan, 0 0 25px purple, 0 0 40px cyan;
   letter-spacing: 3px;
   margin-bottom: 20px;
+  animation: titleGlow 2s ease-in-out infinite alternate;
 }
 
 h2 {
@@ -76,12 +77,29 @@ button {
   transition: transform 0.2s, box-shadow 0.3s;
   margin: 8px;
   width: 250px;
-  touch-action: manipulation; /* Melhora a responsividade no mobile - MANTIDO */
+  touch-action: manipulation;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
 }
 
 button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 15px cyan, 0 0 30px purple;
+}
+
+button:hover::before {
+  left: 100%;
 }
 
 button:active {
@@ -123,28 +141,53 @@ label {
   background: rgba(0, 0, 0, 0.5);
   color: white;
   font-family: 'Orbitron', sans-serif;
+  transition: all 0.3s ease;
 }
 
 .input-box:focus {
   border-color: #ff00ff;
   box-shadow: 0 0 15px #ff00ff, 0 0 20px purple;
+  transform: scale(1.02);
 }
 
 /* Canvas e container */
 .canvas-container {
   position: relative;
   display: inline-block;
-  z-index: 10; /* Canvas abaixo dos botões */
+  z-index: 10;
 }
 
 canvas {
   border: 2px solid cyan;
-  box-shadow: 0 0 20px purple, 0 0 40px cyan;
+  box-shadow: 
+    0 0 20px purple, 
+    0 0 40px cyan,
+    inset 0 0 20px rgba(0, 255, 255, 0.1);
   display: block;
   margin: 0 auto;
   border-radius: 10px;
   max-width: 100%;
   height: auto;
+  transition: all 0.3s ease;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 1));
+}
+
+canvas:hover {
+  box-shadow: 
+    0 0 30px purple, 
+    0 0 60px cyan,
+    inset 0 0 30px rgba(0, 255, 255, 0.2);
+}
+
+/* Efeito de pulsação no canvas durante o jogo */
+@keyframes canvasPulse {
+  0% { box-shadow: 0 0 20px purple, 0 0 40px cyan; }
+  50% { box-shadow: 0 0 30px purple, 0 0 60px cyan; }
+  100% { box-shadow: 0 0 20px purple, 0 0 40px cyan; }
+}
+
+.canvas-playing {
+  animation: canvasPulse 3s ease-in-out infinite;
 }
 
 /* Placar */
@@ -163,6 +206,7 @@ canvas {
   flex-direction: column;
   align-items: center;
   min-width: 120px;
+  position: relative;
 }
 
 .player-name {
@@ -170,6 +214,7 @@ canvas {
   color: cyan;
   text-shadow: 0 0 5px cyan;
   margin-bottom: 5px;
+  transition: all 0.3s ease;
 }
 
 .score-value {
@@ -177,6 +222,28 @@ canvas {
   font-weight: bold;
   color: white;
   text-shadow: 0 0 10px cyan;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+/* Efeito de ponto marcado */
+@keyframes scoreGlow {
+  0% { 
+    transform: scale(1);
+    text-shadow: 0 0 10px cyan;
+  }
+  50% { 
+    transform: scale(1.3);
+    text-shadow: 0 0 20px cyan, 0 0 30px white, 0 0 40px cyan;
+  }
+  100% { 
+    transform: scale(1);
+    text-shadow: 0 0 10px cyan;
+  }
+}
+
+.score-animation {
+  animation: scoreGlow 0.6s ease-out;
 }
 
 .timer {
@@ -185,6 +252,20 @@ canvas {
   color: white;
   text-shadow: 0 0 10px #ff00ff;
   min-width: 80px;
+  transition: all 0.3s ease;
+}
+
+/* Efeito de urgência no timer */
+.timer-urgent {
+  color: #ff4444;
+  text-shadow: 0 0 10px #ff4444, 0 0 20px #ff0000;
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 /* Toggle Switch */
@@ -238,14 +319,17 @@ canvas {
   background: linear-gradient(90deg, cyan, purple);
   transition: .4s;
   border-radius: 50%;
+  box-shadow: 0 0 5px cyan;
 }
 
 input:checked + .slider {
   background-color: #220033;
+  box-shadow: 0 0 10px #ff00ff;
 }
 
 input:checked + .slider:before {
   transform: translateX(30px);
+  box-shadow: 0 0 10px purple;
 }
 
 /* Ranking */
@@ -265,9 +349,18 @@ input:checked + .slider:before {
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
-/* Game buttons - Melhorias para mobile */
+#rankingList li:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-color: cyan;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+}
+
+/* Game buttons */
 .game-buttons {
   display: flex;
   justify-content: center;
@@ -279,6 +372,26 @@ input:checked + .slider:before {
 .game-buttons button {
   width: auto;
   min-width: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+#pauseButton {
+  background: linear-gradient(90deg, #ffaa00, #ff6600);
+  box-shadow: 0 0 10px #ffaa00, 0 0 15px #ff6600;
+}
+
+#pauseButton:hover {
+  box-shadow: 0 0 15px #ffaa00, 0 0 30px #ff6600;
+}
+
+#backToMenuButton {
+  background: linear-gradient(90deg, #ff4444, #cc0000);
+  box-shadow: 0 0 10px #ff4444, 0 0 15px #cc0000;
+}
+
+#backToMenuButton:hover {
+  box-shadow: 0 0 15px #ff4444, 0 0 30px #cc0000;
 }
 
 /* Controles Touch para Mobile */
@@ -289,33 +402,101 @@ input:checked + .slider:before {
   width: 100%;
   height: 40%;
   display: flex;
-  z-index: 15; /* Acima do canvas, abaixo dos botões */
+  z-index: 15;
   pointer-events: none;
 }
 
 .touch-area {
   flex: 1;
   pointer-events: auto;
+  position: relative;
+  overflow: hidden;
 }
 
 .left-area {
   background: linear-gradient(to top, rgba(0, 255, 255, 0.2), transparent);
+  border-right: 1px solid rgba(0, 255, 255, 0.3);
 }
 
 .right-area {
-  background: linear-gradient(to top, rgba(128, 0, 128, 0.2), transparent);
+  background: linear-gradient(to top, rgba(255, 0, 255, 0.2), transparent);
+  border-left: 1px solid rgba(255, 0, 255, 0.3);
+}
+
+/* Efeito de toque */
+.touch-area::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.touch-area:active::before {
+  width: 100px;
+  height: 100px;
 }
 
 /* Animações */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from { 
+    opacity: 0; 
+    transform: scale(0.95) translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) translateY(0); 
+  }
 }
 
-@keyframes glow {
-  0% { text-shadow: 0 0 10px cyan, 0 0 20px purple; }
-  50% { text-shadow: 0 0 15px cyan, 0 0 30px purple, 0 0 40px cyan; }
-  100% { text-shadow: 0 0 10px cyan, 0 0 20px purple; }
+@keyframes titleGlow {
+  0% { 
+    text-shadow: 0 0 10px cyan, 0 0 25px purple, 0 0 40px cyan;
+    transform: scale(1);
+  }
+  100% { 
+    text-shadow: 0 0 15px cyan, 0 0 35px purple, 0 0 50px cyan;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes buttonPulse {
+  0% { box-shadow: 0 0 10px cyan, 0 0 15px purple; }
+  50% { box-shadow: 0 0 20px cyan, 0 0 30px purple; }
+  100% { box-shadow: 0 0 10px cyan, 0 0 15px purple; }
+}
+
+/* Efeito de partículas no fundo */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, cyan, transparent),
+    radial-gradient(2px 2px at 40px 70px, #ff00ff, transparent),
+    radial-gradient(1px 1px at 90px 40px, white, transparent),
+    radial-gradient(1px 1px at 130px 80px, cyan, transparent),
+    radial-gradient(2px 2px at 160px 30px, #ff00ff, transparent);
+  background-repeat: repeat;
+  background-size: 200px 150px;
+  opacity: 0.1;
+  animation: particleFloat 20s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes particleFloat {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-200px, -150px); }
 }
 
 /* Responsividade */
@@ -326,9 +507,9 @@ input:checked + .slider:before {
 
   button {
     font-size: 1rem;
-    padding: 15px 25px; /* Área de toque maior */
+    padding: 15px 25px;
     width: 220px;
-    min-height: 50px; /* Altura mínima para melhor toque */
+    min-height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -417,4 +598,63 @@ input:checked + .slider:before {
   .desktop-only {
     display: none;
   }
+}
+
+/* Efeitos especiais para colisões */
+@keyframes shakeEffect {
+  0% { transform: translate(0); }
+  10% { transform: translate(-5px, -2px); }
+  20% { transform: translate(5px, -4px); }
+  30% { transform: translate(-3px, 2px); }
+  40% { transform: translate(3px, -1px); }
+  50% { transform: translate(-2px, 3px); }
+  60% { transform: translate(2px, 1px); }
+  70% { transform: translate(-1px, -2px); }
+  80% { transform: translate(1px, 4px); }
+  90% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0); }
+}
+
+.shake {
+  animation: shakeEffect 0.5s ease-in-out;
+}
+
+/* Efeito de explosão nos pontos */
+@keyframes explosionEffect {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.explosion {
+  animation: explosionEffect 0.8s ease-out;
+}
+
+/* Efeito de brilho intenso */
+@keyframes intensiveGlow {
+  0% {
+    box-shadow: 0 0 20px purple, 0 0 40px cyan;
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 40px purple, 0 0 80px cyan, 0 0 120px white;
+    filter: brightness(1.5);
+  }
+  100% {
+    box-shadow: 0 0 20px purple, 0 0 40px cyan;
+    filter: brightness(1);
+  }
+}
+
+.intensive-glow {
+  animation: intensiveGlow 0.3s ease-out;
 }
