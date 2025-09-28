@@ -401,14 +401,19 @@ function draw() {
   // Desenha efeitos de brilho primeiro
   glowEffects.forEach(glow => glow.draw(ctx));
   
-  // Desenha a linha central
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-  ctx.setLineDash([10, 15]);
+  // Desenha a linha central com mais destaque em azul neon
+  ctx.strokeStyle = "#00ddff";
+  ctx.lineWidth = 3;
+  ctx.setLineDash([15, 10]);
+  ctx.shadowBlur = 15;
+  ctx.shadowColor = "#00ddff";
   ctx.beginPath();
   ctx.moveTo(canvas.width / 2, 0);
   ctx.lineTo(canvas.width / 2, canvas.height);
   ctx.stroke();
   ctx.setLineDash([]);
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 1;
   
   // Desenha trail da bola
   drawBallTrail();
@@ -693,6 +698,56 @@ function togglePause() {
   document.getElementById("pauseButton").textContent = isPaused ? "Continuar" : "Pausar";
 }
 
+// Função para mostrar placa de vencedor
+function showWinnerModal(winner, p1Score, p2Score) {
+  // Cria o modal
+  const modal = document.createElement('div');
+  modal.className = 'winner-modal';
+  
+  // Determina se é empate
+  const isDraw = p1Score === p2Score;
+  
+  modal.innerHTML = `
+    <div class="winner-card">
+      <div class="winner-title">GAME OVER</div>
+      
+      <div class="winner-scores">
+        <div class="winner-player">
+          <div class="winner-player-name">${player1Name}</div>
+          <div class="winner-player-score">${p1Score}</div>
+        </div>
+        <div class="winner-player">
+          <div class="winner-player-name">${player2Name}</div>
+          <div class="winner-player-score">${p2Score}</div>
+        </div>
+      </div>
+      
+      <div class="winner-result ${isDraw ? 'draw' : ''}">
+        ${isDraw ? 'EMPATE!' : 'VENCEDOR: ' + winner}
+      </div>
+      
+      <div class="winner-buttons">
+        <button class="winner-button" onclick="closeWinnerModal(); startGame('${cpuDifficulty}');">
+          JOGAR NOVAMENTE
+        </button>
+        <button class="winner-button secondary" onclick="closeWinnerModal(); backToMenu();">
+          MENU PRINCIPAL
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Função para fechar placa de vencedor
+function closeWinnerModal() {
+  const modal = document.querySelector('.winner-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
 // Finalizar jogo
 function endGame() {
   gameRunning = false;
@@ -711,11 +766,10 @@ function endGame() {
     playSound('pointSound');
   }
   
-  // Exibe alerta com o resultado
+  // Mostra a placa de vencedor após um breve delay
   setTimeout(() => {
-    alert(`Fim de jogo!\n\n${player1Name}: ${player1Score}\n${player2Name}: ${player2Score}\n\nVencedor: ${winner}`);
-    backToMenu();
-  }, 500);
+    showWinnerModal(winner, player1Score, player2Score);
+  }, 800);
 }
 
 // Reproduzir som
