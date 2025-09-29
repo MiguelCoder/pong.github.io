@@ -1,10 +1,5 @@
 // firebase-config.js
-// Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAKjag2rw3voWirlb4AWiCyxUS96GvOWWE",
     authDomain: "pong-f7b21.firebaseapp.com",
@@ -14,12 +9,12 @@
     appId: "1:395706083073:web:60c55375dcf2f3f44b9d00"
   };
 
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
+
+// Inicializa Firebase
+const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-console.log('🔥 Firebase inicializado!');
-
+console.log('🔥 Firebase inicializado com sucesso!');
 
 // Classe para gerenciar o ranking
 class RankingManager {
@@ -97,9 +92,9 @@ class RankingManager {
 
       // Salva no Firestore
       const docRef = await db.collection('rankings').add(result);
-      console.log('Resultado salvo:', docRef.id);
+      console.log('✅ Resultado salvo:', docRef.id);
 
-      // Verifica se é um novo recorde para mostrar modal
+      // Verifica se é um novo recorde
       const isNewRecord = await this.checkIfNewRecord(playerName, score, gameData.gameMode);
       
       return {
@@ -108,7 +103,7 @@ class RankingManager {
         docId: docRef.id
       };
     } catch (error) {
-      console.error('Erro ao salvar resultado:', error);
+      console.error('❌ Erro ao salvar resultado:', error);
       return null;
     }
   }
@@ -124,7 +119,7 @@ class RankingManager {
         .get();
 
       if (query.empty) {
-        return true; // Primeiro jogo é sempre recorde
+        return true;
       }
 
       const bestScore = query.docs[0].data().score;
@@ -159,7 +154,7 @@ class RankingManager {
       this.rankings[gameMode] = rankings;
       return rankings;
     } catch (error) {
-      console.error('Erro ao carregar ranking:', error);
+      console.error('❌ Erro ao carregar ranking:', error);
       return [];
     }
   }
@@ -202,7 +197,6 @@ class RankingManager {
         <div class="ranking-score">${entry.score}pts</div>
       `;
 
-      // Adiciona classe especial para top 3
       if (position <= 3) {
         li.classList.add(`position-${position}`);
       }
@@ -211,7 +205,7 @@ class RankingManager {
     });
   }
 
-  // Formata data para exibição
+  // Formata data
   formatDate(date) {
     if (!date) return 'Hoje';
     
@@ -226,7 +220,7 @@ class RankingManager {
     return date.toLocaleDateString('pt-BR');
   }
 
-  // Inicializa os event listeners do ranking
+  // Event listeners
   setupRankingEventListeners() {
     const filterSingle = document.getElementById('filterSinglePlayer');
     const filterMulti = document.getElementById('filterMultiplayer');
@@ -244,11 +238,10 @@ class RankingManager {
     }
   }
 
-  // Muda filtro do ranking
+  // Muda filtro
   async switchFilter(filterType) {
     this.currentFilter = filterType;
     
-    // Atualiza botões visuais
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.classList.remove('active');
     });
@@ -259,11 +252,10 @@ class RankingManager {
     
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Mostra loading e carrega dados
     await this.loadAndShowRanking(filterType);
   }
 
-  // Carrega e mostra ranking com loading
+  // Carrega e mostra ranking
   async loadAndShowRanking(gameMode) {
     const loading = document.getElementById('rankingLoading');
     const container = document.getElementById('rankingContainer');
@@ -283,10 +275,10 @@ class RankingManager {
   }
 }
 
-// Instância global do gerenciador de ranking
+// Instância global
 const rankingManager = new RankingManager();
 
-// Função para mostrar modal de novo recorde
+// Mostrar modal de novo recorde
 function showNewRecordModal(score) {
   const modal = document.getElementById('newRecordModal');
   const scoreElement = document.getElementById('recordPoints');
@@ -295,15 +287,18 @@ function showNewRecordModal(score) {
     scoreElement.textContent = score;
     modal.classList.remove('hidden');
     
-    // Adiciona efeito sonoro se disponível
-    playSound('winSound');
+    if (typeof playSound === 'function') {
+      playSound('winSound');
+    }
   }
 }
 
-// Função para fechar modal de novo recorde
+// Fechar modal de novo recorde
 function closeNewRecordModal() {
   const modal = document.getElementById('newRecordModal');
   if (modal) {
     modal.classList.add('hidden');
   }
 }
+
+console.log('📊 RankingManager carregado!');
