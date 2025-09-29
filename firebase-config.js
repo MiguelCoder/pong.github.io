@@ -15,7 +15,10 @@
   };
 
   // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+  const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+console.log('🔥 Firebase inicializado!');
 
 
 // Classe para gerenciar o ranking
