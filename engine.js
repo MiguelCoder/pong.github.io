@@ -504,7 +504,7 @@ function update() {
     
     switch(cpuDifficulty) {
       case "Muito Fácil":
-        cpuSpeed = 3;
+        cpuSpeed = 1;
         break;
       case "Fácil":
         cpuSpeed = 4;
@@ -519,7 +519,7 @@ function update() {
         cpuSpeed = 7;
         break;
       case "Impossível":
-        cpuSpeed = 9;
+        cpuSpeed = 14;
         break;
     }
     
@@ -606,8 +606,8 @@ function update() {
     playSound('hitSound');
     
     // Aumenta velocidade gradualmente
-    ball.velocityX *= 1.05;
-    ball.velocityY *= 1.05;
+    ball.velocityX *= 1.16;
+    ball.velocityY *= 1.16;
   }
   
   if (
