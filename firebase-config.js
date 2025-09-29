@@ -1,19 +1,17 @@
 // firebase-config.js
-// Configuração do Firebase - SUBSTITUA pelos seus dados do console do Firebase
-
-  // Import the functions you need from the SDKs you need
+// Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
   // TODO: Add SDKs for Firebase products that you want to use
   // https://firebase.google.com/docs/web/setup#available-libraries
 
   // Your web app's Firebase configuration
   const firebaseConfig = {
-    apiKey: "AIzaSyAY8ldU9R_Uaf_YTVx80txCl-8Hn5lie8A",
-    authDomain: "pong-f9c0c.firebaseapp.com",
-    projectId: "pong-f9c0c",
-    storageBucket: "pong-f9c0c.firebasestorage.app",
-    messagingSenderId: "713382246249",
-    appId: "1:713382246249:web:114c4977ceeb36a831aff8"
+    apiKey: "AIzaSyAKjag2rw3voWirlb4AWiCyxUS96GvOWWE",
+    authDomain: "pong-f7b21.firebaseapp.com",
+    projectId: "pong-f7b21",
+    storageBucket: "pong-f7b21.firebasestorage.app",
+    messagingSenderId: "395706083073",
+    appId: "1:395706083073:web:60c55375dcf2f3f44b9d00"
   };
 
   // Initialize Firebase
