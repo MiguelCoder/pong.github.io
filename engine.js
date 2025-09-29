@@ -606,8 +606,8 @@ function update() {
     playSound('hitSound');
     
     // Aumenta velocidade gradualmente
-    ball.velocityX *= 1.16;
-    ball.velocityY *= 1.16;
+    ball.velocityX *= 1.05;
+    ball.velocityY *= 1.05;
   }
   
   if (
